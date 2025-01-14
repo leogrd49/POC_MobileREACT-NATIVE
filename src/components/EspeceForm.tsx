@@ -1,4 +1,5 @@
-import React, {useState} from 'react';
+// src/components/EspeceForm.tsx
+import React, { useState } from 'react';
 import {
   View,
   TextInput,
@@ -7,7 +8,10 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import {gql, useMutation} from '@apollo/client';
+import { gql, useMutation } from '@apollo/client';
+import { NetworkManager } from '../utils/networkManager';
+import { dbService } from '../db/dbService';
+import { useOfflineSync } from '../hooks/useOfflineSync';
 
 const ADD_ESPECE = gql`
   mutation AddEspece($id: Int!, $nom: String!) {
@@ -21,17 +25,13 @@ const ADD_ESPECE = gql`
 const EspeceForm = () => {
   const [nom, setNom] = useState('');
   const [mutationError, setMutationError] = useState('');
-  console.log(ADD_ESPECE);
-  const [addEspece, {loading}] = useMutation(ADD_ESPECE, {
+  
+  // Utilisation du hook de synchronisation
+  useOfflineSync();
+
+  const [addEspece, { loading }] = useMutation(ADD_ESPECE, {
     onError: (error) => {
       console.log('Mutation Error:', error);
-      if (error.networkError) {
-        console.log('Network Error Details:', {
-          ...error.networkError,
-          statusCode: error.networkError.statusCode,
-          bodyText: error.networkError.bodyText,
-        });
-      }
       setMutationError(error.message);
     },
     onCompleted: (data) => {
@@ -39,29 +39,45 @@ const EspeceForm = () => {
       setNom('');
       setMutationError('');
       Alert.alert('Succès', `Espèce "${data.addEspece.nom}" ajoutée avec succès`);
-    }
+    },
   });
 
   const handleSubmit = async () => {
-  
     if (!nom.trim()) {
       Alert.alert('Erreur', 'Le nom ne peut pas être vide');
       return;
     }
 
     setMutationError('');
-    console.log('Starting mutation with nom:', nom);
+    const especeId = Math.floor(Math.random() * 1000000);
 
     try {
-      await addEspece({
-        variables: {
-          id: Math.floor(Math.random() * 1000000),
+      const isConnected = await NetworkManager.checkConnection();
+      
+      if (isConnected) {
+        // Mode en ligne: envoi direct à l'API
+        await addEspece({
+          variables: {
+            id: especeId,
+            nom: nom.trim(),
+          },
+        });
+      } else {
+        // Mode hors ligne: sauvegarde en local
+        await dbService.saveEspece({
+          id: especeId,
           nom: nom.trim(),
-        },
-      });
+        });
+        
+        setNom('');
+        Alert.alert(
+          'Sauvegarde locale',
+          'Les données ont été sauvegardées localement et seront synchronisées lorsque la connexion sera rétablie'
+        );
+      }
     } catch (e) {
-      console.log('Caught error during mutation:', e);
-      // L'erreur sera gérée par onError ci-dessus
+      console.error('Error during submission:', e);
+      setMutationError('Une erreur est survenue lors de la sauvegarde');
     }
   };
 
