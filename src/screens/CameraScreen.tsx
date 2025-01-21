@@ -8,6 +8,9 @@ import {
   ActivityIndicator,
   Linking,
   LogBox,
+  Modal,
+  Image,
+  Dimensions,
 } from 'react-native';
 import {
   Camera,
@@ -20,21 +23,23 @@ import {
 import { useIsFocused } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
+
 LogBox.ignoreLogs(['ViewPropTypes']);
 
 const CameraScreen = () => {
-  console.log('CameraScreen rendered');
-
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [isCameraReady, setIsCameraReady] = useState(false);
   const [flash, setFlash] = useState<'off' | 'on'>('off');
+  const [photo, setPhoto] = useState<PhotoFile | null>(null);
+  const [showModal, setShowModal] = useState(false);
   const cameraRef = useRef<Camera>(null);
   
   const devices = useCameraDevices();
   const device = devices.find((d) => d.position === 'back');
   const isFocused = useIsFocused();
 
-  // Nouveau useEffect séparé pour les permissions
   useEffect(() => {
     const getPermission = async () => {
       console.log('Checking camera permission...');
@@ -54,15 +59,6 @@ const CameraScreen = () => {
     getPermission();
   }, []);
 
-  useEffect(() => {
-    console.log('Device or focus changed:', { 
-      hasDevice: !!device, 
-      isFocused,
-      hasPermission,
-      deviceInfo: device ? { id: device.id, position: device.position } : 'no device'
-    });
-  }, [device, isFocused, hasPermission]);
-
   const onError = useCallback((error: CameraRuntimeError) => {
     console.error('Camera error:', {
       code: error.code,
@@ -79,8 +75,7 @@ const CameraScreen = () => {
 
   const toggleFlash = useCallback(() => {
     setFlash(current => (current === 'off' ? 'on' : 'off'));
-    console.log('Flash toggled to:', flash);
-  }, [flash]);
+  }, []);
 
   const takePicture = useCallback(async () => {
     try {
@@ -96,13 +91,19 @@ const CameraScreen = () => {
       });
 
       console.log('Photo taken successfully:', photo.path);
-      Alert.alert('Succès', 'Photo prise avec succès');
+      setPhoto(photo);
+      setShowModal(true);
 
     } catch (error) {
       console.error('Failed to take photo:', error);
       Alert.alert('Erreur', 'Impossible de prendre la photo');
     }
   }, [flash]);
+
+  const closeModal = () => {
+    setShowModal(false);
+    setPhoto(null);
+  };
 
   if (hasPermission === null) {
     return (
@@ -141,7 +142,7 @@ const CameraScreen = () => {
         ref={cameraRef}
         style={StyleSheet.absoluteFill}
         device={device}
-        isActive={isFocused}
+        isActive={isFocused && !showModal}
         photo={true}
         onError={onError}
         enableZoomGesture
@@ -171,6 +172,45 @@ const CameraScreen = () => {
 
         <View style={styles.controlButton} />
       </View>
+
+      <Modal
+        visible={showModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={closeModal}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            {photo && (
+              <Image
+                source={{ uri: `file://${photo.path}` }}
+                style={styles.previewImage}
+                resizeMode="contain"
+              />
+            )}
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={closeModal}
+              >
+                <Icon name="close" size={24} color="white" />
+                <Text style={styles.modalButtonText}>Fermer</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
+                onPress={() => {
+                  // Ajoutez ici la logique pour sauvegarder la photo
+                  Alert.alert('Succès', 'Photo sauvegardée');
+                  closeModal();
+                }}
+              >
+                <Icon name="save" size={24} color="white" />
+                <Text style={styles.modalButtonText}>Sauvegarder</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -234,6 +274,51 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.5,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'black',
+  },
+  previewImage: {
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT - 200,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    paddingVertical: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    position: 'absolute',
+    bottom: 0,
+  },
+  modalButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    minWidth: 120,
+    justifyContent: 'center',
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 16,
+    marginLeft: 8,
+  },
+  cancelButton: {
+    backgroundColor: '#FF4444',
+  },
+  saveButton: {
+    backgroundColor: '#4CAF50',
   },
 });
 
