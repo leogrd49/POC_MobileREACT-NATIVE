@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { View } from 'react-native';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-// Import des écrans
 import HomeScreen from '../screens/HomeScreen';
 import FormScreen from '../screens/FormScreen';
 import CameraScreen from '../screens/CameraScreen';
 import MapScreen from '../screens/MapScreen';
+import PlanScreen from '../screens/PlanScreen';
 
 export type RootTabParamList = {
   Home: undefined;
   Form: undefined;
   Camera: undefined;
   Map: undefined;
+  Plan: undefined;
 };
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -25,8 +25,7 @@ export const AppNavigator = () => {
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ focused, color, size }) => {
-            let iconName: string;
-
+            let iconName: string = 'circle';
             switch (route.name) {
               case 'Home':
                 iconName = 'home';
@@ -40,10 +39,10 @@ export const AppNavigator = () => {
               case 'Map':
                 iconName = 'map';
                 break;
-              default:
-                iconName = 'circle';
+              case 'Plan':
+                iconName = 'grid-on';
+                break;
             }
-
             return <Icon name={iconName} size={size} color={color} />;
           },
           tabBarActiveTintColor: '#2196F3',
@@ -81,7 +80,14 @@ export const AppNavigator = () => {
           name="Map"
           component={MapScreen}
           options={{
-            title: 'Carte',
+            title: 'Carte Interactive',
+          }}
+        />
+        <Tab.Screen
+          name="Plan"
+          component={PlanScreen}
+          options={{
+            title: 'Plan de l\'essai',
           }}
         />
       </Tab.Navigator>
