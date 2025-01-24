@@ -22,6 +22,7 @@ import {
 } from 'react-native-vision-camera';
 import { useIsFocused } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { imageDbService } from '../db/imageDbService';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -199,9 +200,10 @@ const CameraScreen = () => {
               <TouchableOpacity
                 style={[styles.modalButton, styles.saveButton]}
                 onPress={() => {
-                  // Ajoutez ici la logique pour sauvegarder la photo
-                  Alert.alert('Succès', 'Photo sauvegardée');
-                  closeModal();
+                  if (photo) {
+                    imageDbService.saveImage(photo.path);
+                    closeModal();
+                  }
                 }}
               >
                 <Icon name="save" size={24} color="white" />
