@@ -1,30 +1,32 @@
-import SQLite from 'react-native-sqlite-storage';
 import client from '../apollo/client';
-import { SYNC_IMAGE } from '../graphql/mutations/sync_images';
+import { gql } from '@apollo/client';
+
+const ADD_IMAGE = gql`
+  mutation AddImage($path: String!, $url: String) {
+    addImage(path: $path, url: $url) {
+      id
+      path
+      url
+    }
+  }
+`;
 
 export class ImageDatabaseService {
-  private static instance: ImageDatabaseService;
-  private database: SQLite.SQLiteDatabase | null = null;
-
-  static getInstance(): ImageDatabaseService {
-    if (!ImageDatabaseService.instance) {
-      ImageDatabaseService.instance = new ImageDatabaseService();
-    }
-    return ImageDatabaseService.instance;
-  }
-
   async saveImage(path: string): Promise<void> {
     try {
-      await client.mutate({
-        mutation: SYNC_IMAGE,
-        variables: { path }
+      const result = await client.mutate({
+        mutation: ADD_IMAGE,
+        variables: {
+          path,
+          url: null
+        }
       });
-      console.log('Image synced successfully');
+      console.log('Image saved:', result);
     } catch (error) {
-      console.error('GraphQL sync error:', error);
+      console.error('Save error:', error);
       throw error;
     }
   }
 }
 
-export const imageDbService = ImageDatabaseService.getInstance();
+export const imageDbService = new ImageDatabaseService();
