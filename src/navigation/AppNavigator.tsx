@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import Feather from 'react-native-vector-icons/Feather';
 
 import HomeScreen from '../screens/HomeScreen';
 import FormScreen from '../screens/FormScreen';
@@ -31,19 +31,19 @@ export const AppNavigator = () => {
                 iconName = 'home';
                 break;
               case 'Form':
-                iconName = 'list-alt';
+                iconName = 'book-open';
                 break;
               case 'Camera':
-                iconName = 'camera-alt';
+                iconName = 'camera';
                 break;
               case 'Map':
-                iconName = 'map';
+                iconName = 'map-pin';
                 break;
               case 'Plan':
-                iconName = 'grid-on';
+                iconName = 'map';
                 break;
             }
-            return <Icon name={iconName} size={size} color={color} />;
+            return <Feather name={iconName} size={size} color={color} />;
           },
           tabBarActiveTintColor: '#2196F3',
           tabBarInactiveTintColor: 'gray',

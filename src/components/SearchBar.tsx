@@ -32,29 +32,57 @@ const SearchBar = () => {
         <View style={styles.filterContent}>
           <View style={styles.coordContainer}>
             <View style={styles.coordGroup}>
-              <Text>X:</Text>
+              <Text style={styles.label}>X:</Text>
               <View style={styles.inputGroup}>
-                <TextInput placeholder="De" style={styles.coordInput} />
-                <TextInput placeholder="A" style={styles.coordInput} />
+                <TextInput 
+                  placeholder="De" 
+                  style={styles.coordInput}
+                  placeholderTextColor="#666"
+                  color="#000"
+                />
+                <TextInput 
+                  placeholder="A" 
+                  style={styles.coordInput}
+                  placeholderTextColor="#666"
+                  color="#000"
+                />
               </View>
             </View>
             <View style={styles.coordGroup}>
-              <Text>Y:</Text>
+              <Text style={styles.label}>Y:</Text>
               <View style={styles.inputGroup}>
-                <TextInput placeholder="De" style={styles.coordInput} />
-                <TextInput placeholder="A" style={styles.coordInput} />
+                <TextInput 
+                  placeholder="De" 
+                  style={styles.coordInput}
+                  placeholderTextColor="#666"
+                  color="#000"
+                />
+                <TextInput 
+                  placeholder="A" 
+                  style={styles.coordInput}
+                  placeholderTextColor="#666"
+                  color="#000"
+                />
               </View>
             </View>
           </View>
 
           <View style={styles.blockInputs}>
             <View style={styles.blockGroup}>
-              <Text>BLOC:</Text>
-              <TextInput style={styles.blockInput} />
+              <Text style={styles.label}>BLOC:</Text>
+              <TextInput 
+                style={styles.blockInput}
+                placeholderTextColor="#666"
+                color="#000"
+              />
             </View>
             <View style={styles.blockGroup}>
-              <Text>COL:</Text>
-              <TextInput style={styles.blockInput} />
+              <Text style={styles.label}>COL:</Text>
+              <TextInput 
+                style={styles.blockInput}
+                placeholderTextColor="#666"
+                color="#000"
+              />
             </View>
           </View>
         </View>
@@ -85,6 +113,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     marginRight: 8,
+    color: '#000',
   },
   filterButton: {
     padding: 8,
@@ -130,6 +159,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     padding: 8,
     marginTop: 4,
+  },
+  label: {
+    color: '#000',
   },
 });
 
