@@ -3,8 +3,7 @@ import { View, StyleSheet, Image, ScrollView, Text } from 'react-native';
 import { Button } from '../components/ui/button';
 import EspeceForm from '../components/EspeceForm';
 import EspeceList from '../components/EspeceList';
-import { useQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
+import { useQuery, gql } from '@apollo/client';
 
 const GET_IMAGES = gql`
   query GetImages {
@@ -17,7 +16,7 @@ const GET_IMAGES = gql`
 
 const HomeScreen = () => {
   const [currentView, setCurrentView] = useState<'form' | 'list' | 'images'>('form');
-  const { loading, error, data } = useQuery(GET_IMAGES);
+  const { data: imageData } = useQuery(GET_IMAGES);
 
   const renderContent = () => {
     switch (currentView) {
@@ -26,11 +25,9 @@ const HomeScreen = () => {
       case 'list':
         return <EspeceList />;
       case 'images':
-        if (loading) return <Text>Chargement...</Text>;
-        if (error) return <Text>Erreur : {error.message}</Text>;
         return (
-          <ScrollView style={styles.imageList}>
-            {data?.images?.map((img: any) => (
+          <ScrollView contentContainerStyle={styles.imageGrid}>
+            {imageData?.images?.map((img: any) => (
               <View key={img.id} style={styles.imageContainer}>
                 <Image 
                   source={{ uri: `file://${img.path}` }}
@@ -99,26 +96,23 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-  imageList: {
+  imageGrid: {
     padding: 8,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   imageContainer: {
-    marginBottom: 16,
+    width: '48%',
+    aspectRatio: 1,
+    margin: '1%',
     borderRadius: 8,
     overflow: 'hidden',
     backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    elevation: 2,
   },
   image: {
     width: '100%',
-    height: 200,
+    height: '100%',
   }
 });
 
